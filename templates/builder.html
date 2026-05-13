@@ -1,0 +1,268 @@
+{% extends "base.html" %}
+
+{% block title %}Resume Builder - Resume AI Builder{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>✏️ Resume Builder</h1>
+    <p>Create a professional resume from scratch</p>
+    {% if template %}
+    <p class="template-info">{{ template.icon }} Using <strong>{{ template.title }}</strong> template</p>
+    <a href="/builder/templates" class="btn-small">← Choose Different Template</a>
+    {% endif %}
+</div>
+
+<div class="builder-container">
+    <div class="builder-form">
+        {% if error %}
+        <div class="error-box">
+            <strong>❌ Error:</strong> {{ error }}
+        </div>
+        {% endif %}
+        
+        {% if success %}
+        <div class="success-box">
+            <strong>✓ Resume Created!</strong> Your resume has been saved.
+            <p>Resume ID: {{ resume_id }}</p>
+            <a href="/preview/{{ resume_id }}?download=true" class="btn btn-primary">📥 Download as PDF</a>
+            <a href="/dashboard" class="btn btn-secondary">Back to Dashboard</a>
+        </div>
+        {% else %}
+
+        <form method="POST" class="form-full">
+            <!-- Personal Information -->
+            <fieldset class="form-section">
+                <legend>Personal Information</legend>
+                
+                <div class="form-group">
+                    <label for="name">Full Name *</label>
+                    <input 
+                        type="text" 
+                        id="name" 
+                        name="name" 
+                        required
+                        class="form-input"
+                        placeholder="John Doe"
+                        value="{% if template_data %}{{ template_data.name }}{% endif %}"
+                    >
+                </div>
+                
+                <div class="form-group">
+                    <label for="role">Job Title/Role *</label>
+                    <input 
+                        type="text" 
+                        id="role" 
+                        name="role" 
+                        required
+                        class="form-input"
+                        placeholder="Senior Python Developer"
+                        value="{% if template_data %}{{ template_data.role }}{% endif %}"
+                    >
+                </div>
+
+                <div class="form-group" style="margin-top: 15px;">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" class="form-input" value="{% if template_data %}{{ template_data.email }}{% endif %}">
+                </div>
+                <div class="form-group" style="margin-top: 15px;">
+                    <label for="phone">Phone</label>
+                    <input type="text" id="phone" name="phone" class="form-input" value="{% if template_data %}{{ template_data.phone }}{% endif %}">
+                </div>
+                <div class="form-group" style="margin-top: 15px;">
+                    <label for="address">Address</label>
+                    <input type="text" id="address" name="address" class="form-input" value="{% if template_data %}{{ template_data.address }}{% endif %}">
+                </div>
+            </fieldset>
+
+            <!-- Professional Summary -->
+            <fieldset class="form-section">
+                <legend>Professional Summary</legend>
+                
+                <div class="form-group">
+                    <label for="summary">Summary *</label>
+                    <textarea 
+                        id="summary" 
+                        name="summary" 
+                        required
+                        rows="5"
+                        class="form-input"
+                        placeholder="Write a brief overview of your professional background, key skills, and career goals..."
+                    >{% if template_data %}{{ template_data.summary }}{% endif %}</textarea>
+                    <small>Keep it concise (2-3 sentences)</small>
+                </div>
+            </fieldset>
+
+            <!-- Experience -->
+            <fieldset class="form-section">
+                <legend>Work Experience</legend>
+                
+                <div class="form-group">
+                    <label for="experience">Experience *</label>
+                    <textarea 
+                        id="experience" 
+                        name="experience" 
+                        required
+                        rows="6"
+                        class="form-input"
+                        placeholder="List your work experience in reverse chronological order. Example:
+
+Senior Developer at Tech Company (2020-Present)
+- Led development of microservices architecture
+- Managed team of 5 developers
+- Increased application performance by 40%
+
+Developer at StartUp Inc (2018-2020)
+- Built REST APIs using Python and Django
+- Deployed applications to AWS"
+                    >{% if template_data %}{{ template_data.experience }}{% endif %}</textarea>
+                    <small>Tip: Use bullet points and quantify achievements</small>
+                </div>
+            </fieldset>
+
+            <!-- Skills -->
+            <fieldset class="form-section">
+                <legend>Skills</legend>
+                
+                <div class="form-group">
+                    <label for="skills">Skills *</label>
+                    <input 
+                        type="text" 
+                        id="skills" 
+                        name="skills" 
+                        required
+                        class="form-input"
+                        placeholder="Python, Django, Flask, PostgreSQL, Docker, AWS, Git, JavaScript, HTML/CSS"
+                        value="{% if template_data %}{{ template_data.skills }}{% endif %}"
+                    >
+                    <small>Separate skills with commas. Include technical and soft skills.</small>
+                </div>
+            </fieldset>
+
+            <!-- Education -->
+            <fieldset class="form-section">
+                <legend>Education</legend>
+                
+                <div class="form-group">
+                    <label for="education">Education *</label>
+                    <textarea 
+                        id="education" 
+                        name="education" 
+                        required
+                        rows="4"
+                        class="form-input"
+                        placeholder="B.S. Computer Science
+University of Example
+Graduated: May 2020"
+                    >{% if template_data %}{{ template_data.education }}{% endif %}</textarea>
+                </div>
+            </fieldset>
+
+            <!-- Additional Sections -->
+            <fieldset class="form-section">
+                <legend>Additional Sections (Optional)</legend>
+
+                <div class="form-group">
+                    <label for="projects">Projects</label>
+                    <textarea id="projects" name="projects" rows="4" class="form-input">{% if template_data %}{{ template_data.projects }}{% endif %}</textarea>
+                </div>
+
+                <div class="form-group" style="margin-top: 15px;">
+                    <label for="internships">Internships</label>
+                    <textarea id="internships" name="internships" rows="4" class="form-input">{% if template_data %}{{ template_data.internships }}{% endif %}</textarea>
+                </div>
+
+                <div class="form-group" style="margin-top: 15px;">
+                    <label for="certifications">Certifications</label>
+                    <textarea id="certifications" name="certifications" rows="3" class="form-input">{% if template_data %}{{ template_data.certifications }}{% endif %}</textarea>
+                </div>
+                
+                <!-- Hidden fields for other template data so they aren't lost -->
+                <input type="hidden" name="linkedin" value="{% if template_data %}{{ template_data.linkedin }}{% endif %}">
+                <input type="hidden" name="github_link" value="{% if template_data %}{{ template_data.github_link }}{% endif %}">
+                <input type="hidden" name="strengths" value="{% if template_data %}{{ template_data.strengths }}{% endif %}">
+                <input type="hidden" name="weaknesses" value="{% if template_data %}{{ template_data.weaknesses }}{% endif %}">
+                <input type="hidden" name="declaration" value="{% if template_data %}{{ template_data.declaration }}{% endif %}">
+            </fieldset>
+
+            <button type="submit" class="btn btn-primary btn-full">Create Resume</button>
+        </form>
+
+        {% endif %}
+    </div>
+
+    <!-- Live Preview -->
+    <div class="builder-preview">
+        <div class="preview-header">
+            <h3>📄 Live Preview</h3>
+        </div>
+        
+        <div class="preview-content" id="preview">
+            <div class="preview-section">
+                <h2 id="preview-name">Your Name</h2>
+                <p id="preview-role" class="role">Job Title</p>
+            </div>
+
+            <div class="preview-section">
+                <h3>Professional Summary</h3>
+                <p id="preview-summary">Your summary will appear here as you type...</p>
+            </div>
+
+            <div class="preview-section">
+                <h3>Experience</h3>
+                <p id="preview-experience">Your experience will appear here...</p>
+            </div>
+
+            <div class="preview-section">
+                <h3>Skills</h3>
+                <p id="preview-skills">Your skills will appear here...</p>
+            </div>
+
+            <div class="preview-section">
+                <h3>Education</h3>
+                <p id="preview-education">Your education will appear here...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Live preview updates
+const inputs = {
+    name: document.getElementById('name'),
+    role: document.getElementById('role'),
+    summary: document.getElementById('summary'),
+    experience: document.getElementById('experience'),
+    skills: document.getElementById('skills'),
+    education: document.getElementById('education')
+};
+
+const previews = {
+    name: document.getElementById('preview-name'),
+    role: document.getElementById('preview-role'),
+    summary: document.getElementById('preview-summary'),
+    experience: document.getElementById('preview-experience'),
+    skills: document.getElementById('preview-skills'),
+    education: document.getElementById('preview-education')
+};
+
+// Update preview as user types
+Object.keys(inputs).forEach(key => {
+    inputs[key].addEventListener('input', function() {
+        if (key === 'experience' || key === 'education') {
+            previews[key].innerHTML = this.value
+                .split('\n')
+                .filter(line => line.trim())
+                .join('<br>');
+        } else if (key === 'skills') {
+            previews[key].textContent = this.value
+                .split(',')
+                .map(s => s.trim())
+                .filter(s => s)
+                .join(' • ');
+        } else {
+            previews[key].textContent = this.value || `Your ${key}`;
+        }
+    });
+});
+</script>
+{% endblock %}

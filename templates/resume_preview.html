@@ -1,0 +1,72 @@
+<div class="resume-header">
+    <div class="preview-name">{{ template_data.name }}</div>
+    <div class="preview-role">{{ template_data.role }}</div>
+    <div class="resume-contact-info">
+        {% if template_data.phone %}<span class="contact-item">📱 {{ template_data.phone }}</span>{% endif %}
+        {% if template_data.email %}<span class="contact-item">📧 {{ template_data.email }}</span>{% endif %}
+        {% if template_data.linkedin %}<span class="contact-item">💼 {{ template_data.linkedin }}</span>{% endif %}
+        {% if template_data.dob %}<span class="contact-item">📅 DOB: {{ template_data.dob }}</span>{% endif %}
+        {% if template_data.address %}<span class="contact-item">📍 {{ template_data.address }}</span>{% endif %}
+        {% if template_data.github_link %}<span class="contact-item">🐙 {{ template_data.github_link }}</span>{% endif %}
+    </div>
+</div>
+
+<div class="resume-section">
+    <div class="resume-section-title">Professional Summary</div>
+    <div class="resume-section-content preview-summary">{{ template_data.summary }}</div>
+</div>
+
+<div class="resume-section">
+    <div class="resume-section-title">Work Experience</div>
+    <div class="resume-section-content preview-experience">{{ template_data.experience }}</div>
+</div>
+
+<div class="resume-section" id="section-internships" {% if not template_data.internships %}style="display: none;"{% endif %}>
+    <div class="resume-section-title">Internships</div>
+    <div class="resume-section-content preview-internships">{{ template_data.internships }}</div>
+</div>
+
+<div class="resume-section" id="section-projects" {% if not template_data.projects %}style="display: none;"{% endif %}>
+    <div class="resume-section-title">Projects</div>
+    <div class="resume-section-content preview-projects">{{ template_data.projects }}</div>
+</div>
+
+<div class="resume-section" id="section-certifications" {% if not template_data.certifications %}style="display: none;"{% endif %}>
+    <div class="resume-section-title">Certifications</div>
+    <div class="resume-section-content preview-certifications">{{ template_data.certifications }}</div>
+</div>
+
+<div class="resume-section">
+    <div class="resume-section-title">Skills</div>
+    <div class="resume-section-content preview-skills">
+        {% if template_data.skills %}
+            <ul class="skills-list">
+            {% for skill_line in template_data.skills.split('\n') %}
+                {% if skill_line.strip() %}
+                    <li class="skill-item">{{ skill_line.strip() }}</li>
+                {% endif %}
+            {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
+</div>
+
+<div class="resume-section">
+    <div class="resume-section-title">Education</div>
+    <div class="resume-section-content preview-education">{{ template_data.education }}</div>
+</div>
+
+<div class="resume-section" id="section-strengths" {% if not template_data.strengths %}style="display: none;"{% endif %}>
+    <div class="resume-section-title">Strengths</div>
+    <div class="resume-section-content preview-strengths">{{ template_data.strengths }}</div>
+</div>
+
+<div class="resume-section" id="section-weaknesses" {% if not template_data.weaknesses %}style="display: none;"{% endif %}>
+    <div class="resume-section-title">Areas to Improve</div>
+    <div class="resume-section-content preview-weaknesses">{{ template_data.weaknesses }}</div>
+</div>
+
+<div class="resume-section" id="section-declaration" {% if not template_data.declaration %}style="display: none;"{% endif %}>
+    <div class="resume-section-title">Declaration</div>
+    <div class="resume-section-content preview-declaration">{{ template_data.declaration }}</div>
+</div>

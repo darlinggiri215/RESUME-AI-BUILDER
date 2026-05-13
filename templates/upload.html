@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+
+{% block title %}Upload Resume - Resume AI Builder{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>📤 Upload Your Resume</h1>
+    <p>Upload an existing resume (PDF, DOCX, or TXT)</p>
+</div>
+
+<div class="form-container">
+    {% if error %}
+    <div class="error-box">
+        <strong>❌ Error:</strong> {{ error }}
+    </div>
+    {% endif %}
+    
+    {% if success %}
+    <div class="success-box">
+        <strong>✓ Success!</strong> Your resume has been uploaded and parsed.
+        <p>Resume ID: {{ resume_id }}</p>
+        <a href="/dashboard" class="btn btn-primary">Back to Dashboard</a>
+    </div>
+    {% else %}
+
+    <div class="upload-section">
+        <h3>Step 1: Upload File</h3>
+        <form method="POST" enctype="multipart/form-data" class="upload-form">
+            <div class="file-upload-area" id="upload-area">
+                <div class="upload-icon">📄</div>
+                <p>Drag and drop your resume here</p>
+                <p class="upload-or">or</p>
+                <label for="file" class="btn btn-primary">Choose File</label>
+                <input 
+                    type="file" 
+                    id="file" 
+                    name="file" 
+                    accept=".pdf,.docx,.txt"
+                    required
+                    hidden
+                >
+                <p class="upload-info">Supported formats: PDF, DOCX, TXT (Max 10MB)</p>
+            </div>
+            
+            <div id="file-preview" class="file-preview" style="display: none;">
+                <p>Selected file: <strong id="file-name"></strong></p>
+            </div>
+            
+            <h3>Step 2: Additional Information (Optional)</h3>
+            
+            <div class="form-group">
+                <label for="summary">Professional Summary</label>
+                <textarea 
+                    id="summary" 
+                    name="summary" 
+                    rows="4"
+                    class="form-input"
+                    placeholder="Brief overview of your professional background..."
+                ></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="skills">Skills (comma-separated)</label>
+                <input 
+                    type="text" 
+                    id="skills" 
+                    name="skills" 
+                    class="form-input"
+                    placeholder="Python, Django, PostgreSQL, Docker..."
+                >
+            </div>
+            
+            <div class="form-group">
+                <label for="experience">Experience Highlights</label>
+                <textarea 
+                    id="experience" 
+                    name="experience" 
+                    rows="3"
+                    class="form-input"
+                    placeholder="Key roles and accomplishments..."
+                ></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="education">Education</label>
+                <input 
+                    type="text" 
+                    id="education" 
+                    name="education" 
+                    class="form-input"
+                    placeholder="B.S. Computer Science, University of Example (2020)"
+                >
+            </div>
+            
+            <button type="submit" class="btn btn-primary btn-full" id="submit-btn" disabled>Upload Resume</button>
+        </form>
+    </div>
+
+    {% endif %}
+
+    <div class="tips-box">
+        <h3>📋 Tips for Best Results</h3>
+        <ul>
+            <li>Use standard fonts (Arial, Calibri, Times New Roman)</li>
+            <li>Avoid tables, images, and unusual formatting</li>
+            <li>Keep file size under 10MB</li>
+            <li>Use clear section headers (Experience, Education, Skills, etc.)</li>
+            <li>Include contact information at the top</li>
+        </ul>
+    </div>
+</div>
+
+<script>
+    const fileInput = document.getElementById('file');
+    const submitBtn = document.getElementById('submit-btn');
+    const uploadArea = document.getElementById('upload-area');
+    const filePreview = document.getElementById('file-preview');
+    const fileName = document.getElementById('file-name');
+
+    // Enable submit when file is selected
+    fileInput.addEventListener('change', function(e) {
+        if (this.files.length > 0) {
+            fileName.textContent = this.files[0].name;
+            filePreview.style.display = 'block';
+            uploadArea.style.opacity = '0.5';
+            submitBtn.disabled = false;
+        }
+    });
+
+    // Drag and drop support
+    uploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadArea.classList.add('dragover');
+    });
+
+    uploadArea.addEventListener('dragleave', () => {
+        uploadArea.classList.remove('dragover');
+    });
+
+    uploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+        fileInput.files = e.dataTransfer.files;
+        fileInput.dispatchEvent(new Event('change'));
+    });
+
+    // Click to select
+    uploadArea.addEventListener('click', () => {
+        fileInput.click();
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,583 @@
+{% extends "base.html" %}
+
+{% block title %}Sign Up - Resume AI Builder{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-box">
+        <h1>📝 Create Account</h1>
+        <p class="auth-subtitle">Join Resume AI Builder today</p>
+        
+        {% if error %}
+        <div class="error-box">
+            <strong>❌ Error:</strong> {{ error }}
+        </div>
+        {% endif %}
+        
+        {% if success %}
+        <div class="success-box">
+            <strong>✓ Success!</strong> {{ success }}
+            <p>You can now <a href="/login">login to your account</a></p>
+        </div>
+        {% else %}
+        
+        <!-- STEP 1: Contact Information & Password Setup -->
+        <div id="step1" class="signup-step active">
+            <div class="step-indicator">
+                <span class="step-number">1</span> / 3
+            </div>
+            
+            <form id="step1-form" class="auth-form">
+                <div class="form-group">
+                    <label for="full_name">Full Name</label>
+                    <input 
+                        type="text" 
+                        id="full_name" 
+                        name="full_name" 
+                        required 
+                        placeholder="John Doe"
+                        class="form-input"
+                        oninput="validateStep1()"
+                    >
+                </div>
+                
+                <!-- Contact Type Toggle -->
+                <div class="form-group">
+                    <label>How would you like to verify your account?</label>
+                    <div class="contact-type-toggle">
+                        <label class="radio-label">
+                            <input 
+                                type="radio" 
+                                name="contact_type" 
+                                value="email" 
+                                checked
+                                onchange="toggleContactType('email')"
+                            >
+                            📧 Email
+                        </label>
+                        <label class="radio-label">
+                            <input 
+                                type="radio" 
+                                name="contact_type" 
+                                value="mobile"
+                                onchange="toggleContactType('mobile')"
+                            >
+                            📱 Mobile Number
+                        </label>
+                    </div>
+                </div>
+                
+                <!-- Email Input -->
+                <div class="form-group" id="email-group">
+                    <label for="email">Email Address</label>
+                    <input 
+                        type="email" 
+                        id="email" 
+                        name="email" 
+                        placeholder="your@email.com"
+                        class="form-input"
+                        oninput="validateStep1()"
+                    >
+                    <small id="email-feedback" style="color: #999;"></small>
+                </div>
+                
+                <!-- Mobile Input -->
+                <div class="form-group" id="mobile-group" style="display: none;">
+                    <label for="mobile">Mobile Number</label>
+                    <input 
+                        type="tel" 
+                        id="mobile" 
+                        name="mobile" 
+                        placeholder="+1 (555) 123-4567"
+                        class="form-input"
+                        oninput="validateStep1()"
+                    >
+                    <small id="mobile-feedback" style="color: #999;"></small>
+                </div>
+                
+                <!-- Password -->
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input 
+                        type="password" 
+                        id="password" 
+                        name="password" 
+                        required 
+                        placeholder="••••••••"
+                        class="form-input"
+                        oninput="validatePassword()"
+                    >
+                    <small><strong>Password must contain:</strong></small>
+                    <ul class="password-requirements" id="password-requirements">
+                        <li id="req-length" class="pending">At least 8 characters</li>
+                        <li id="req-upper" class="pending">One uppercase letter (A-Z)</li>
+                        <li id="req-special" class="pending">One special character (!@#$%^&* etc.)</li>
+                        <li id="req-numbers" class="pending">At least 2 numbers</li>
+                    </ul>
+                </div>
+                
+                <!-- Confirm Password -->
+                <div class="form-group">
+                    <label for="confirm_password">Confirm Password</label>
+                    <input 
+                        type="password" 
+                        id="confirm_password" 
+                        name="confirm_password" 
+                        required 
+                        placeholder="••••••••"
+                        class="form-input"
+                        oninput="validatePassword()"
+                    >
+                    <small id="password-match" style="color: #999;"></small>
+                </div>
+                
+                <button type="button" class="btn btn-primary btn-full" id="step1-btn" disabled onclick="proceedToStep2()">
+                    Send OTP
+                </button>
+            </form>
+        </div>
+        
+        <!-- STEP 2: OTP Verification -->
+        <div id="step2" class="signup-step" style="display: none;">
+            <div class="step-indicator">
+                <span class="step-number">2</span> / 3
+            </div>
+            
+            <form id="step2-form" class="auth-form">
+                <p class="info-text">We've sent a 6-digit OTP to your <span id="contact-display">email</span>. Enter it below to verify.</p>
+                
+                <div class="form-group">
+                    <label for="otp">Enter OTP Code</label>
+                    <input 
+                        type="text" 
+                        id="otp" 
+                        name="otp" 
+                        maxlength="6"
+                        placeholder="000000"
+                        class="form-input otp-input"
+                        required
+                        oninput="formatOTPInput(this)"
+                    >
+                    <small id="otp-timer">Resend in <span id="timer-count">60</span>s</small>
+                </div>
+                
+                <button type="button" class="btn btn-primary btn-full" onclick="verifyOTP()">
+                    Verify OTP
+                </button>
+                
+                <button type="button" class="btn btn-secondary btn-full" onclick="goBackToStep1()">
+                    Back
+                </button>
+            </form>
+        </div>
+        
+        <!-- STEP 3: Success -->
+        <div id="step3" class="signup-step" style="display: none;">
+            <div class="step-indicator">
+                <span class="step-number">3</span> / 3
+            </div>
+            
+            <div class="success-message">
+                <div class="success-icon">✅</div>
+                <h2>Account Created Successfully!</h2>
+                <p>Your account has been verified and is ready to use.</p>
+                <p>You can now login with your email/mobile and password.</p>
+                <a href="/login" class="btn btn-primary btn-full">Go to Login</a>
+            </div>
+        </div>
+        
+        <div class="auth-footer">
+            <p>Already have an account? <a href="/login">Login here</a></p>
+        </div>
+        
+        {% endif %}
+    </div>
+</div>
+
+<script>
+// Global state
+let otpTimerInterval = null;
+
+function toggleContactType(type) {
+    const emailGroup = document.getElementById('email-group');
+    const mobileGroup = document.getElementById('mobile-group');
+    const emailInput = document.getElementById('email');
+    const mobileInput = document.getElementById('mobile');
+    
+    if (type === 'email') {
+        emailGroup.style.display = 'block';
+        mobileGroup.style.display = 'none';
+        mobileInput.removeAttribute('required');
+        emailInput.setAttribute('required', 'required');
+    } else {
+        emailGroup.style.display = 'none';
+        mobileGroup.style.display = 'block';
+        emailInput.removeAttribute('required');
+        mobileInput.setAttribute('required', 'required');
+    }
+    validateStep1();
+}
+
+function validatePassword() {
+    const password = document.getElementById('password').value;
+    const confirmPassword = document.getElementById('confirm_password').value;
+    
+    const hasLength = password.length >= 8;
+    const hasUpper = /[A-Z]/.test(password);
+    const hasSpecial = /[!@#$%^&*()_+\-=\[\]{};:'"",.<>?/\\|`~]/.test(password);
+    const hasNumbers = (password.match(/\d/g) || []).length >= 2;
+    
+    updateRequirement('req-length', hasLength);
+    updateRequirement('req-upper', hasUpper);
+    updateRequirement('req-special', hasSpecial);
+    updateRequirement('req-numbers', hasNumbers);
+    
+    const passwordMatch = password === confirmPassword;
+    document.getElementById('password-match').textContent = 
+        passwordMatch ? '✓ Passwords match' : 'Passwords do not match';
+    document.getElementById('password-match').style.color = 
+        passwordMatch ? '#28a745' : '#dc3545';
+    
+    validateStep1();
+}
+
+function updateRequirement(id, met) {
+    const el = document.getElementById(id);
+    if (met) {
+        el.classList.remove('pending');
+        el.classList.add('complete');
+    } else {
+        el.classList.add('pending');
+        el.classList.remove('complete');
+    }
+    
+    // Update requirements box styling
+    const reqBox = document.getElementById('password-requirements');
+    if (reqBox) {
+        const allComplete = reqBox.querySelectorAll('li.complete').length === reqBox.querySelectorAll('li').length;
+        if (allComplete) {
+            reqBox.classList.add('all-met');
+        } else {
+            reqBox.classList.remove('all-met');
+        }
+    }
+}
+
+function validateStep1() {
+    const fullName = document.getElementById('full_name').value.trim();
+    const password = document.getElementById('password').value;
+    const confirmPassword = document.getElementById('confirm_password').value;
+    const contactType = document.querySelector('input[name="contact_type"]:checked').value;
+    
+    let contact = '';
+    let isValidContact = false;
+    
+    if (contactType === 'email') {
+        contact = document.getElementById('email').value.trim();
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        isValidContact = emailRegex.test(contact);
+        
+        // Update email feedback
+        const emailFeedback = document.getElementById('email-feedback');
+        if (contact === '') {
+            emailFeedback.textContent = '';
+            emailFeedback.style.color = '#999';
+        } else if (isValidContact) {
+            emailFeedback.textContent = '✓ Valid email';
+            emailFeedback.style.color = '#28a745';
+        } else {
+            emailFeedback.textContent = '✗ Invalid email format';
+            emailFeedback.style.color = '#dc3545';
+        }
+    } else {
+        contact = document.getElementById('mobile').value.trim();
+        const mobileRegex = /^[\d\s\+\-\(\)]{7,}$/;
+        isValidContact = mobileRegex.test(contact);
+        
+        // Update mobile feedback
+        const mobileFeedback = document.getElementById('mobile-feedback');
+        if (contact === '') {
+            mobileFeedback.textContent = '';
+            mobileFeedback.style.color = '#999';
+        } else if (isValidContact) {
+            mobileFeedback.textContent = '✓ Valid mobile number';
+            mobileFeedback.style.color = '#28a745';
+        } else {
+            mobileFeedback.textContent = '✗ Invalid mobile format';
+            mobileFeedback.style.color = '#dc3545';
+        }
+    }
+    
+    const hasLength = password.length >= 8;
+    const hasUpper = /[A-Z]/.test(password);
+    const hasSpecial = /[!@#$%^&*()_+\-=\[\]{};:'"",.<>?/\\|`~]/.test(password);
+    const hasNumbers = (password.match(/\d/g) || []).length >= 2;
+    const passwordMatch = password === confirmPassword;
+    
+    const allMet = fullName && isValidContact && hasLength && hasUpper && hasSpecial && hasNumbers && passwordMatch;
+    document.getElementById('step1-btn').disabled = !allMet;
+}
+
+function proceedToStep2() {
+    const fullName = document.getElementById('full_name').value.trim();
+    const contactType = document.querySelector('input[name="contact_type"]:checked').value;
+    let contact = '';
+    
+    if (contactType === 'email') {
+        contact = document.getElementById('email').value.trim();
+        if (!contact.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+            alert('Please enter a valid email address');
+            return;
+        }
+    } else {
+        contact = document.getElementById('mobile').value.trim();
+        if (!contact.match(/^[\d\s\+\-\(\)]{7,}$/)) {
+            alert('Please enter a valid mobile number');
+            return;
+        }
+    }
+    
+    // Send OTP request to server
+    fetch('/api/send-otp', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            contact: contact,
+            contact_type: contactType,
+            full_name: fullName
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            // Move to step 2
+            document.getElementById('step1').classList.remove('active');
+            document.getElementById('step1').style.display = 'none';
+            document.getElementById('step2').style.display = 'block';
+            document.getElementById('contact-display').textContent = contactType === 'email' ? 'email' : 'mobile number';
+            
+            // Start OTP timer
+            startOTPTimer();
+            
+            // Store contact info for verification
+            sessionStorage.setItem('contact', contact);
+            sessionStorage.setItem('contact_type', contactType);
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        alert('Error sending OTP');
+    });
+}
+
+function formatOTPInput(input) {
+    // Only allow digits
+    input.value = input.value.replace(/[^\d]/g, '');
+}
+
+function startOTPTimer() {
+    let seconds = 60;
+    const timerEl = document.getElementById('timer-count');
+    const timerContainer = document.getElementById('otp-timer');
+    
+    if (otpTimerInterval) clearInterval(otpTimerInterval);
+    
+    otpTimerInterval = setInterval(() => {
+        seconds--;
+        timerEl.textContent = seconds;
+        
+        if (seconds <= 0) {
+            clearInterval(otpTimerInterval);
+            timerContainer.innerHTML = '<button type="button" class="btn-link" onclick="proceedToStep2()">Resend OTP</button>';
+        }
+    }, 1000);
+}
+
+function verifyOTP() {
+    const otp = document.getElementById('otp').value.trim();
+    const contact = sessionStorage.getItem('contact');
+    const contactType = sessionStorage.getItem('contact_type');
+    const password = document.getElementById('password').value;
+    const fullName = document.getElementById('full_name').value.trim();
+    
+    if (!otp || otp.length !== 6) {
+        alert('Please enter a valid 6-digit OTP');
+        return;
+    }
+    
+    fetch('/api/verify-otp-signup', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            contact: contact,
+            contact_type: contactType,
+            otp: otp,
+            full_name: fullName,
+            password: password
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            // Move to step 3 (success)
+            document.getElementById('step2').style.display = 'none';
+            document.getElementById('step3').style.display = 'block';
+            
+            // Clear session storage
+            sessionStorage.removeItem('contact');
+            sessionStorage.removeItem('contact_type');
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        alert('Error verifying OTP');
+    });
+}
+
+function goBackToStep1() {
+    document.getElementById('step2').style.display = 'none';
+    document.getElementById('step1').style.display = 'block';
+    document.getElementById('step1').classList.add('active');
+    
+    if (otpTimerInterval) {
+        clearInterval(otpTimerInterval);
+    }
+}
+
+// Validate on input
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('full_name').addEventListener('input', validateStep1);
+    document.getElementById('email').addEventListener('input', validateStep1);
+    document.getElementById('mobile').addEventListener('input', validateStep1);
+    document.getElementById('password').addEventListener('input', validatePassword);
+    document.getElementById('confirm_password').addEventListener('input', validatePassword);
+});
+</script>
+
+<style>
+.contact-type-toggle {
+    display: flex;
+    gap: 20px;
+    margin: 10px 0;
+}
+
+.radio-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    padding: 10px;
+    border-radius: 5px;
+    border: 2px solid #e0e0e0;
+    flex: 1;
+    transition: all 0.3s ease;
+}
+
+.radio-label:hover {
+    border-color: #4CAF50;
+    background: #f0f8f0;
+}
+
+.radio-label input[type="radio"] {
+    cursor: pointer;
+}
+
+.signup-step {
+    display: none;
+}
+
+.signup-step.active {
+    display: block;
+}
+
+.step-indicator {
+    text-align: center;
+    color: #666;
+    margin-bottom: 20px;
+    font-size: 14px;
+}
+
+.step-number {
+    background: #4CAF50;
+    color: white;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+}
+
+.info-text {
+    text-align: center;
+    color: #666;
+    margin-bottom: 20px;
+    font-size: 14px;
+}
+
+.otp-input {
+    text-align: center;
+    letter-spacing: 10px;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+#otp-timer {
+    text-align: center;
+    display: block;
+    margin-top: 10px;
+    color: #999;
+    font-size: 12px;
+}
+
+.btn-link {
+    background: none;
+    border: none;
+    color: #4CAF50;
+    cursor: pointer;
+    text-decoration: underline;
+    padding: 0;
+}
+
+.btn-link:hover {
+    color: #45a049;
+}
+
+.success-message {
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.success-icon {
+    font-size: 60px;
+    margin-bottom: 20px;
+}
+
+.success-message h2 {
+    color: #4CAF50;
+    margin: 20px 0;
+}
+
+.success-message p {
+    color: #666;
+    margin: 10px 0;
+}
+
+.btn-secondary {
+    background-color: #666;
+}
+
+.btn-secondary:hover {
+    background-color: #555;
+}
+</style>
+{% endblock %}

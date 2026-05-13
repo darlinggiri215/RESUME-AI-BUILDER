@@ -1,0 +1,187 @@
+{% extends "base.html" %}
+
+{% block title %}Select Resume Template - Resume Builder{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>✨ Choose Your Resume Template</h1>
+    <p>Click on any template to preview and start editing</p>
+</div>
+
+<div class="templates-container">
+    <div class="templates-grid">
+        {% for template_id, template in templates.items() %}
+        <a href="/builder/select/{{ template.id }}" class="visual-template-card">
+            <!-- Resume Preview -->
+            <div class="resume-preview">
+                <div class="preview-header">
+                    <div class="preview-name">{{ template.data.name }}</div>
+                    <div class="preview-role">{{ template.data.role }}</div>
+                </div>
+                
+                <div class="preview-section">
+                    <div class="preview-section-title">SUMMARY</div>
+                    <div class="preview-text">{{ template.data.summary[:80] }}...</div>
+                </div>
+                
+                <div class="preview-section">
+                    <div class="preview-section-title">SKILLS</div>
+                    <div class="preview-text">{{ template.data.skills.split(',')[:5] | join(', ') }}...</div>
+                </div>
+                
+                <div class="preview-footer">
+                    <span class="template-title">{{ template.icon }} {{ template.title }}</span>
+                    <span class="preview-cta">Click to Edit →</span>
+                </div>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+</div>
+
+<style>
+.templates-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: var(--spacing-xl);
+}
+
+.templates-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: var(--spacing-large);
+}
+
+.visual-template-card {
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.resume-preview {
+    background: white;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 32px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    height: 400px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+    font-family: 'Calibri', 'Arial', sans-serif;
+    transition: all 0.3s ease;
+}
+
+.visual-template-card:hover .resume-preview {
+    border-color: var(--primary-color);
+    box-shadow: 0 12px 32px rgba(0, 102, 204, 0.2);
+    transform: translateY(-8px);
+}
+
+.resume-preview::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(135deg, var(--primary-color) 0%, #0052a3 100%);
+}
+
+.preview-header {
+    margin-bottom: 16px;
+    border-bottom: 2px solid #f0f0f0;
+    padding-bottom: 12px;
+}
+
+.preview-name {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--dark-gray);
+    letter-spacing: 0.5px;
+}
+
+.preview-role {
+    font-size: 14px;
+    color: var(--primary-color);
+    font-weight: 600;
+    margin-top: 4px;
+}
+
+.preview-section {
+    margin-bottom: 16px;
+    flex-grow: 1;
+    overflow: hidden;
+}
+
+.preview-section-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--dark-gray);
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+}
+
+.preview-text {
+    font-size: 13px;
+    color: #555;
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.preview-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: auto;
+    padding-top: 12px;
+    border-top: 1px solid #f0f0f0;
+    font-size: 13px;
+}
+
+.template-title {
+    font-weight: 600;
+    color: var(--dark-gray);
+}
+
+.preview-cta {
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+.visual-template-card:hover .preview-cta {
+    transform: translateX(4px);
+    transition: transform 0.3s ease;
+}
+
+@media (max-width: 1024px) {
+    .templates-grid {
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    }
+
+    .resume-preview {
+        padding: 24px;
+        height: 380px;
+    }
+}
+
+@media (max-width: 768px) {
+    .templates-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .resume-preview {
+        height: auto;
+        min-height: 350px;
+    }
+}
+</style>
+{% endblock %}

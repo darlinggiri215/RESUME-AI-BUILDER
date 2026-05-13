@@ -1,0 +1,238 @@
+{% extends "base.html" %}
+
+{% block title %}ATS Score Check - Resume AI Builder{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>📊 ATS Score Check</h1>
+    <p>Check how well your resume matches a job description</p>
+</div>
+
+<div class="form-container">
+    {% if error %}
+    <div class="error-box">
+        <strong>❌ Error:</strong> {{ error }}
+    </div>
+    {% endif %}
+
+    {% if score is defined %}
+    <!-- RESULTS VIEW -->
+    <div class="ats-results">
+        <!-- Score Card -->
+        <div class="score-card-large">
+            <div class="score-circle">
+                <span class="score-number">{{ score }}</span>
+                <span class="score-percent">%</span>
+            </div>
+            <h2>ATS Compatibility Score</h2>
+            
+            {% if score >= 80 %}
+                <p class="score-status excellent">✓✓ EXCELLENT MATCH</p>
+                <p class="score-message">Your resume is highly compatible with this job!</p>
+            {% elif score >= 60 %}
+                <p class="score-status good">✓ GOOD MATCH</p>
+                <p class="score-message">Your resume matches well with the job description.</p>
+            {% elif score >= 30 %}
+                <p class="score-status moderate">📊 MODERATE MATCH</p>
+                <p class="score-message">There's room for improvement. See suggestions below.</p>
+            {% else %}
+                <p class="score-status low">⚠️ LOW MATCH</p>
+                <p class="score-message">Your resume needs significant updates for this role.</p>
+            {% endif %}
+        </div>
+
+        <!-- Missing Keywords -->
+        {% if missing_keywords %}
+        <div class="keywords-box">
+            <h3>🔑 Missing Keywords</h3>
+            <p class="keywords-intro">Add these keywords to improve your ATS score:</p>
+            <div class="keywords-grid">
+                {% for keyword in missing_keywords %}
+                <span class="keyword-tag">{{ keyword }}</span>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Skills Found -->
+        {% if skills_found %}
+        <div class="skills-box">
+            <h3>✓ Skills Found in Your Resume</h3>
+            <div class="skills-grid">
+                {% for skill in skills_found %}
+                <span class="skill-tag">{{ skill }}</span>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Feedback -->
+        {% if feedback %}
+        <div class="feedback-box">
+            <h3>💡 Feedback & Recommendations</h3>
+            <div class="feedback-content">
+                {{ feedback | safe | replace('\n', '<br>') }}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Structure Analysis -->
+        {% if structure %}
+        <div class="structure-box">
+            <h3>📋 Resume Structure Analysis</h3>
+            <div class="structure-grid">
+                <div class="structure-item {% if structure.contact %}complete{% endif %}">
+                    {% if structure.contact %}✓{% else %}✗{% endif %} Contact Info
+                </div>
+                <div class="structure-item {% if structure.summary %}complete{% endif %}">
+                    {% if structure.summary %}✓{% else %}✗{% endif %} Summary
+                </div>
+                <div class="structure-item {% if structure.experience %}complete{% endif %}">
+                    {% if structure.experience %}✓{% else %}✗{% endif %} Experience
+                </div>
+                <div class="structure-item {% if structure.skills %}complete{% endif %}">
+                    {% if structure.skills %}✓{% else %}✗{% endif %} Skills
+                </div>
+                <div class="structure-item {% if structure.education %}complete{% endif %}">
+                    {% if structure.education %}✓{% else %}✗{% endif %} Education
+                </div>
+                <div class="structure-item {% if structure.projects %}complete{% endif %}">
+                    {% if structure.projects %}✓{% else %}✗{% endif %} Projects
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Action Buttons -->
+        <div class="result-actions">
+            <a href="/ats-score" class="btn btn-secondary">Check Another Resume{% if is_external %} / File{% endif %}</a>
+            <a href="/dashboard" class="btn btn-primary">Back to Dashboard</a>
+        </div>
+    </div>
+
+    {% else %}
+    <!-- FORM VIEW -->
+    <form method="POST" class="ats-form" enctype="multipart/form-data">
+        <div class="form-section">
+            <h3>Step 1: Select or Upload Resume</h3>
+            
+            <div style="margin-bottom: 20px;">
+                <div style="display: flex; align-items: center; margin-bottom: 15px;">
+                    <input type="radio" id="option_database" name="resume_source" value="database" checked style="margin-right: 10px;">
+                    <label for="option_database" style="margin-bottom: 0;"><strong>From Your Resumes</strong></label>
+                </div>
+                
+                {% if resumes %}
+                <div class="form-group" style="margin-left: 30px;">
+                    <label for="resume_id">Your Resume</label>
+                    <select id="resume_id" name="resume_id" class="form-input">
+                        <option value="">-- Select a resume --</option>
+                        {% for resume in resumes %}
+                        <option value="{{ resume.id }}">
+                            {{ resume.name or 'Unnamed' }} - {{ resume.role }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                {% else %}
+                <p class="warning-box" style="margin-left: 30px;">
+                    📝 You don't have any resumes yet. 
+                    <a href="/upload">Upload</a> or 
+                    <a href="/builder">create</a> a resume first.
+                </p>
+                {% endif %}
+            </div>
+            
+            <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #ddd;">
+                <div style="display: flex; align-items: center; margin-bottom: 15px;">
+                    <input type="radio" id="option_upload" name="resume_source" value="upload" style="margin-right: 10px;">
+                    <label for="option_upload" style="margin-bottom: 0;"><strong>Upload External Resume</strong></label>
+                </div>
+                
+                <div class="form-group" style="margin-left: 30px;">
+                    <label for="resume_file">Upload Resume File</label>
+                    <input 
+                        type="file" 
+                        id="resume_file" 
+                        name="resume_file" 
+                        class="form-input"
+                        accept=".pdf,.doc,.docx,.txt"
+                    >
+                    <small>Supported formats: PDF, DOC, DOCX, TXT</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h3>Step 2: Enter Job Description</h3>
+            
+            <div class="form-group">
+                <label for="job_description">Job Description</label>
+                <textarea 
+                    id="job_description" 
+                    name="job_description" 
+                    required
+                    rows="10"
+                    class="form-input"
+                    placeholder="Paste the complete job description here. Include the job title, requirements, responsibilities, and preferred qualifications..."
+                ></textarea>
+                <small>💡 TIP: Copy and paste the full job posting for best results</small>
+            </div>
+        </div>
+
+        <button 
+            type="submit" 
+            class="btn btn-primary btn-full"
+            id="submitBtn"
+        >
+            Check ATS Score
+        </button>
+
+        <script>
+document.querySelectorAll('input[name="resume_source"]').forEach(radio => {
+    radio.addEventListener('change', function() {
+        const submitBtn = document.getElementById('submitBtn');
+        const resumeSelect = document.getElementById('resume_id');
+        
+        if (this.value === 'database') {
+            submitBtn.disabled = !resumeSelect || !resumeSelect.value;
+        } else {
+            submitBtn.disabled = false;
+        }
+    });
+});
+
+// Initial button state
+window.addEventListener('load', function() {
+    const submitBtn = document.getElementById('submitBtn');
+    const resumeSelect = document.getElementById('resume_id');
+    const radioDatabase = document.getElementById('option_database');
+    
+    if (radioDatabase.checked && (!resumeSelect || !resumeSelect.value)) {
+        submitBtn.disabled = true;
+    }
+});
+
+resume_select = document.getElementById('resume_id');
+if (resume_select) {
+    resume_select.addEventListener('change', function() {
+        document.getElementById('submitBtn').disabled = !this.value;
+    });
+}
+        </script>
+    </form>
+
+    <div class="tips-box">
+        <h3>📌 How ATS Scoring Works</h3>
+        <ul>
+            <li><strong>Keyword Matching:</strong> We compare keywords in your resume with the job description</li>
+            <li><strong>Higher Score:</strong> More matching keywords = better compatibility</li>
+            <li><strong>Missing Keywords:</strong> These are important terms from the job that aren't in your resume</li>
+            <li><strong>Optimization:</strong> Add missing keywords naturally to your resume to improve your score</li>
+            <li><strong>Target Score:</strong> Aim for 70%+ compatibility with jobs you apply to</li>
+        </ul>
+    </div>
+
+    {% endif %}
+</div>
+{% endblock %}

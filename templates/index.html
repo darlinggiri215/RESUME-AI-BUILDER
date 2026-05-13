@@ -1,0 +1,344 @@
+{% extends "base.html" %}
+
+{% block title %}Resume AI Builder - Create Professional Resumes{% endblock %}
+
+{% block content %}
+
+{% if session.user_id %}
+<!-- User is logged in - show dashboard redirect -->
+<div style="text-align: center; padding: 60px 20px;">
+    <h2>Welcome back!</h2>
+    <p>Go to your dashboard to continue working on your resumes.</p>
+    <a href="/dashboard" class="btn btn-primary btn-large" style="padding: 15px 40px; font-size: 18px;">Open Dashboard</a>
+</div>
+
+{% else %}
+
+<!-- PREMIUM LANDING PAGE - NOT LOGGED IN -->
+<div class="premium-landing">
+    <!-- Left Side - Content -->
+    <div class="landing-left">
+        <div class="landing-content">
+            <h1 class="landing-title">Land Your Dream Job</h1>
+            <p class="landing-description">
+                Build stunning resumes that pass ATS systems and impress recruiters. 
+                Get real-time feedback on how your resume matches job postings.
+            </p>
+            
+            <div class="premium-features">
+                <div class="premium-feature">
+                    <span class="feature-icon">✨</span>
+                    <h4>Smart ATS Scoring</h4>
+                    <p>See exactly how compatible your resume is with any job</p>
+                </div>
+                <div class="premium-feature">
+                    <span class="feature-icon">🔑</span>
+                    <h4>Keyword Insights</h4>
+                    <p>Get AI recommendations on keywords to boost your score</p>
+                </div>
+                <div class="premium-feature">
+                    <span class="feature-icon">📝</span>
+                    <h4>Easy Builder</h4>
+                    <p>Create or upload resumes in minutes with our simple tools</p>
+                </div>
+                <div class="premium-feature">
+                    <span class="feature-icon">📄</span>
+                    <h4>Professional PDFs</h4>
+                    <p>Download beautiful, ATS-friendly resumes instantly</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Side - Auth Forms -->
+    <div class="landing-right">
+        <div class="auth-card-premium">
+            <!-- Tab Buttons -->
+            <div class="auth-tabs">
+                <button class="auth-tab-btn active" data-tab="login">Sign In</button>
+                <button class="auth-tab-btn" data-tab="signup">Create Account</button>
+            </div>
+
+            <!-- LOGIN FORM -->
+            <div id="login-tab" class="auth-tab-content active">
+                <h2>Welcome Back</h2>
+                <form method="POST" action="/" class="auth-form-premium" id="login-form-premium">
+                    <input type="hidden" name="action" value="login">
+                    
+                    {% if error %}
+                    <div class="error-box">{{ error }}</div>
+                    {% endif %}
+                    
+                    <div class="form-group-premium">
+                        <label>Email</label>
+                        <input 
+                            type="email" 
+                            name="email" 
+                            required 
+                            placeholder="your@email.com"
+                            class="input-premium"
+                            id="login-email"
+                            oninput="validateLoginForm()"
+                        >
+                    </div>
+                    
+                    <div class="form-group-premium">
+                        <label>Password</label>
+                        <input 
+                            type="password" 
+                            name="password" 
+                            required 
+                            placeholder="••••••••"
+                            class="input-premium"
+                            id="login-password"
+                            oninput="validateLoginForm()"
+                        >
+                    </div>
+                    
+                    <button type="submit" class="btn-premium btn-primary-premium" id="login-btn-premium" disabled>Sign In</button>
+                    
+                    <div class="login-links" style="text-align: center; margin-top: 12px;">
+                        <a href="/forgot-password" style="color: #0066cc; font-size: 14px; text-decoration: none;">Forgot Password?</a>
+                    </div>
+                </form>
+            </div>
+
+            <!-- SIGNUP FORM -->
+            <div id="signup-tab" class="auth-tab-content">
+                <h2>Create Account</h2>
+                <form method="POST" action="/" id="signup-form-premium" class="auth-form-premium">
+                    <input type="hidden" name="action" value="signup">
+                    
+                    {% if signup_error %}
+                    <div class="error-box">{{ signup_error }}</div>
+                    {% endif %}
+                    
+                    {% if success %}
+                    <div class="success-box">{{ success }}</div>
+                    {% endif %}
+                    
+                    <div class="form-group-premium">
+                        <label>Full Name</label>
+                        <input 
+                            type="text" 
+                            name="full_name" 
+                            required 
+                            placeholder="John Doe"
+                            class="input-premium"
+                            id="fullname-input-premium"
+                            oninput="validateSignupForm()"
+                        >
+                    </div>
+                    
+                    <div class="form-group-premium">
+                        <label>Email</label>
+                        <input 
+                            type="email" 
+                            name="email" 
+                            required 
+                            placeholder="your@email.com"
+                            class="input-premium"
+                            id="signup-email"
+                            oninput="validateSignupEmail()"
+                        >
+                        <div id="email-error" style="color: #dc3545; font-size: 13px; margin-top: 5px; display: none;"></div>
+                        <div id="email-success" style="color: #28a745; font-size: 13px; margin-top: 5px; display: none;">✓ Email available</div>
+                    </div>
+                    
+                    <div class="form-group-premium">
+                        <label>Password</label>
+                        <input 
+                            type="password" 
+                            name="password" 
+                            required 
+                            placeholder="••••••••"
+                            class="input-premium"
+                            onchange="validatePasswordPremium()"
+                            id="password-input-premium"
+                        >
+                        <div id="password-requirements" class="password-reqs-mini">
+                            <div id="req-length-mini" class="req-mini">↳ 8 characters</div>
+                            <div id="req-upper-mini" class="req-mini">↳ 1 uppercase</div>
+                            <div id="req-special-mini" class="req-mini">↳ 1 special char</div>
+                            <div id="req-numbers-mini" class="req-mini">↳ 2 numbers</div>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn-premium btn-primary-premium" id="signup-btn-premium" disabled>
+                        Create Account
+                    </button>
+                </form>
+            </div>
+
+            <p class="auth-footer-premium">
+                We respect your privacy. No spam, ever.
+            </p>
+        </div>
+    </div>
+</div>
+
+<script>
+// Tab switching
+document.querySelectorAll('.auth-tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const tab = btn.dataset.tab;
+        
+        // Hide all tabs
+        document.querySelectorAll('.auth-tab-content').forEach(content => {
+            content.classList.remove('active');
+        });
+        
+        // Remove active class from all buttons
+        document.querySelectorAll('.auth-tab-btn').forEach(b => {
+            b.classList.remove('active');
+        });
+        
+        // Show selected tab
+        document.getElementById(tab + '-tab').classList.add('active');
+        btn.classList.add('active');
+    });
+});
+
+// Password validation for premium signup
+function validatePasswordPremium() {
+    const password = document.getElementById('password-input-premium').value;
+    const submitBtn = document.getElementById('signup-btn-premium');
+    
+    const hasLength = password.length >= 8;
+    const hasUpper = /[A-Z]/.test(password);
+    const hasSpecial = /[!@#$%^&*()_+\-=\[\]{};:'"",.<>?/\\|`~]/.test(password);
+    const hasNumbers = (password.match(/\d/g) || []).length >= 2;
+    
+    updateReqMini('req-length-mini', hasLength);
+    updateReqMini('req-upper-mini', hasUpper);
+    updateReqMini('req-special-mini', hasSpecial);
+    updateReqMini('req-numbers-mini', hasNumbers);
+    
+    validateSignupForm();
+}
+
+function updateReqMini(id, met) {
+    const el = document.getElementById(id);
+    if (met) {
+        el.classList.add('met');
+        el.textContent = el.textContent.replace('↳', '✓');
+    } else {
+        el.classList.remove('met');
+        el.textContent = el.textContent.replace('✓', '↳');
+    }
+}
+
+document.getElementById('password-input-premium').addEventListener('input', validatePasswordPremium);
+
+// Real-time validation for login form
+function validateLoginForm() {
+    const email = document.getElementById('login-email').value.trim();
+    const password = document.getElementById('login-password').value;
+    const loginBtn = document.getElementById('login-btn-premium');
+    
+    const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    const isPasswordValid = password.length >= 6;
+    
+    loginBtn.disabled = !(isEmailValid && isPasswordValid);
+}
+
+// Real-time email validation for signup
+async function validateSignupEmail() {
+    const email = document.getElementById('signup-email').value.trim();
+    const errorDiv = document.getElementById('email-error');
+    const successDiv = document.getElementById('email-success');
+    const signupBtn = document.getElementById('signup-btn-premium');
+    
+    errorDiv.style.display = 'none';
+    successDiv.style.display = 'none';
+    
+    // Check email format
+    const isEmailFormatValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    
+    if (!email) {
+        signupBtn.disabled = true;
+        return;
+    }
+    
+    if (!isEmailFormatValid) {
+        errorDiv.textContent = '❌ Invalid email format';
+        errorDiv.style.display = 'block';
+        signupBtn.disabled = true;
+        return;
+    }
+    
+    // Check if email already exists
+    try {
+        const response = await fetch('/api/check-email', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ email: email })
+        });
+        
+        const data = await response.json();
+        
+        if (data.exists) {
+            errorDiv.textContent = '❌ Email already registered';
+            errorDiv.style.display = 'block';
+            signupBtn.disabled = true;
+        } else {
+            successDiv.style.display = 'block';
+            validateSignupForm();
+        }
+    } catch (error) {
+        console.error('Error checking email:', error);
+        signupBtn.disabled = true;
+    }
+}
+
+// Validate entire signup form
+function validateSignupForm() {
+    const fullName = document.getElementById('fullname-input-premium')?.value || '';
+    const email = document.getElementById('signup-email').value.trim();
+    const password = document.getElementById('password-input-premium').value;
+    const signupBtn = document.getElementById('signup-btn-premium');
+    
+    const isEmailFormatValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    const hasLength = password.length >= 8;
+    const hasUpper = /[A-Z]/.test(password);
+    const hasSpecial = /[!@#$%^&*()_+\-=\[\]{};:'"",.<>?/\\|`~]/.test(password);
+    const hasNumbers = (password.match(/\d/g) || []).length >= 2;
+    const hasFullName = fullName.trim().length > 0;
+    
+    const emailError = document.getElementById('email-error').style.display === 'block';
+    
+    signupBtn.disabled = !(hasFullName && isEmailFormatValid && hasLength && hasUpper && hasSpecial && hasNumbers && !emailError);
+}
+</script>
+
+{% endif %}
+
+<!-- Hidden "How it works" section - only shown after login -->
+<div class="how-it-works" style="display: none;">
+    <h2>How It Works</h2>
+    <div class="steps">
+        <div class="step">
+            <div class="step-number">1</div>
+            <h4>Upload or Create</h4>
+            <p>Upload your existing resume or build a new one</p>
+        </div>
+        <div class="step">
+            <div class="step-number">2</div>
+            <h4>Add Job Description</h4>
+            <p>Paste a job description you're interested in</p>
+        </div>
+        <div class="step">
+            <div class="step-number">3</div>
+            <h4>Get ATS Score</h4>
+            <p>See your compatibility score and get improvement tips</p>
+        </div>
+        <div class="step">
+            <div class="step-number">4</div>
+            <h4>Optimize & Download</h4>
+            <p>Make improvements and download your optimized resume</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

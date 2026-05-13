@@ -1,0 +1,676 @@
+{% extends "base.html" %}
+
+{% block title %}Resume Builder - Resume AI Builder{% endblock %}
+
+{% block content %}
+<div class="visual-builder-container">
+    <!-- Left: Resume Preview -->
+    <div class="resume-preview-panel">
+        <div class="preview-header-bar">
+            <h3>Resume Preview</h3>
+            <a href="/builder/templates" class="btn-small">← Back to Templates</a>
+        </div>
+        
+        <div id="resumePreview" class="resume-content">
+            {% include 'resume_preview.html' %}
+        </div>
+    </div>
+    
+    <!-- Right: Editing Panel -->
+    <div class="editor-panel">
+        <div class="editor-header">
+            <h3>Edit Your Resume</h3>
+            <div class="editor-actions">
+                <button type="button" id="saveBtn" class="btn btn-primary">💾 Create Resume</button>
+            </div>
+        </div>
+        <form id="builderForm" method="POST" action="/builder" class="editor-form">
+            {% if error %}
+            <div style="background: #ffcccc; color: #cc0000; padding: 10px; margin-bottom: 15px; border-radius: 5px; text-align: center; font-weight: bold;">
+                {{ error }}
+            </div>
+            {% endif %}
+            
+            <input type="hidden" name="action" value="save_visual">
+            <!-- Personal Information -->
+            <div class="editor-section">
+                <h4 class="section-title">👤 Personal Information</h4>
+                
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input 
+                        type="text" 
+                        name="name" 
+                        class="form-input editor-input" 
+                        value="{{ template_data.name }}"
+                        required
+                        oninput="updatePreview()"
+                    >
+                </div>
+                
+                <div class="form-group">
+                    <label>Date of Birth</label>
+                    <input 
+                        type="text" 
+                        name="dob" 
+                        class="form-input editor-input" 
+                        placeholder="MM/DD/YYYY"
+                        value="{{ template_data.dob }}"
+                        oninput="updatePreview()"
+                    >
+                </div>
+                
+                <div class="form-group">
+                    <label>Email</label>
+                    <input 
+                        type="email" 
+                        name="email" 
+                        class="form-input editor-input" 
+                        value="{{ template_data.email }}"
+                        oninput="updatePreview()"
+                    >
+                </div>
+                
+                <div class="form-group">
+                    <label>Phone</label>
+                    <input 
+                        type="tel" 
+                        name="phone" 
+                        class="form-input editor-input" 
+                        value="{{ template_data.phone }}"
+                        oninput="updatePreview()"
+                    >
+                </div>
+                
+                <div class="form-group">
+                    <label>LinkedIn Profile</label>
+                    <input 
+                        type="text" 
+                        name="linkedin" 
+                        class="form-input editor-input" 
+                        placeholder="linkedin.com/in/yourprofile"
+                        value="{{ template_data.linkedin }}"
+                        oninput="updatePreview()"
+                    >
+                </div>
+                
+                <div class="form-group">
+                    <label>Job Title/Role</label>
+                    <input 
+                        type="text" 
+                        name="role" 
+                        class="form-input editor-input" 
+                        value="{{ template_data.role }}"
+                        required
+                        oninput="updatePreview()"
+                    >
+                </div>
+            </div>
+            
+            <!-- Professional Summary -->
+            <div class="editor-section">
+                <h4 class="section-title">📝 Professional Summary</h4>
+                
+                <div class="form-group">
+                    <label>Summary</label>
+                    <textarea 
+                        name="summary" 
+                        class="form-input editor-input" 
+                        rows="4"
+                        required
+                        oninput="updatePreview()"
+                    >{{ template_data.summary }}</textarea>
+                </div>
+            </div>
+            
+            <!-- Work Experience -->
+            <div class="editor-section">
+                <h4 class="section-title">💼 Work Experience</h4>
+                
+                <div class="form-group">
+                    <label>Experience</label>
+                    <textarea 
+                        name="experience" 
+                        class="form-input editor-input" 
+                        rows="5"
+                        required
+                        oninput="updatePreview()"
+                    >{{ template_data.experience }}</textarea>
+                    <small>Use bullet points with dashes (-) for each achievement</small>
+                </div>
+            </div>
+            
+            <!-- Internships -->
+            <div class="editor-section">
+                <h4 class="section-title">🎓 Internships</h4>
+                
+                <div class="form-group">
+                    <label>Internships (optional)</label>
+                    <textarea 
+                        name="internships" 
+                        class="form-input editor-input" 
+                        rows="4"
+                        oninput="updatePreview()"
+                    >{{ template_data.internships }}</textarea>
+                    <small>Format same as work experience</small>
+                </div>
+            </div>
+            
+            <!-- Projects -->
+            <div class="editor-section">
+                <h4 class="section-title">🚀 Projects</h4>
+                
+                <div class="form-group">
+                    <label>Projects (optional)</label>
+                    <textarea 
+                        name="projects" 
+                        class="form-input editor-input" 
+                        rows="4"
+                        oninput="updatePreview()"
+                    >{{ template_data.projects }}</textarea>
+                    <small>Personal projects, GitHub contributions, or hackathon wins</small>
+                </div>
+            </div>
+            
+            <!-- Certifications -->
+            <div class="editor-section">
+                <h4 class="section-title">⭐ Certifications</h4>
+                
+                <div class="form-group">
+                    <label>Certifications (optional)</label>
+                    <textarea 
+                        name="certifications" 
+                        class="form-input editor-input" 
+                        rows="4"
+                        oninput="updatePreview()"
+                    >{{ template_data.certifications }}</textarea>
+                    <small>Professional certifications and achievements</small>
+                </div>
+            </div>
+            
+            <!-- Skills -->
+            <div class="editor-section">
+                <h4 class="section-title">🔧 Skills</h4>
+                
+                <div class="form-group">
+                    <label>Skills (one per line with description)</label>
+                    <textarea 
+                        name="skills" 
+                        class="form-input editor-input" 
+                        rows="6"
+                        required
+                        oninput="updatePreview()"
+                        placeholder="Python - Expert in object-oriented programming&#10;JavaScript - Proficient in ES6+ and async operations&#10;React - Advanced experience with component-based UIs"
+                    >{{ template_data.skills }}</textarea>
+                    <small>Format: Skill Name - 1-2 sentence description (one per line)</small>
+                </div>
+            </div>
+            
+            <!-- Education -->
+            <div class="editor-section">
+                <h4 class="section-title">🎓 Education</h4>
+                
+                <div class="form-group">
+                    <label>Education</label>
+                    <textarea 
+                        name="education" 
+                        class="form-input editor-input" 
+                        rows="4"
+                        required
+                        oninput="updatePreview()"
+                    >{{ template_data.education }}</textarea>
+                </div>
+            </div>
+            
+            <!-- Additional Information -->
+            <div class="editor-section">
+                <h4 class="section-title">📍 Additional Information</h4>
+                
+                <div class="form-group">
+                    <label>Address</label>
+                    <input 
+                        type="text" 
+                        name="address" 
+                        class="form-input editor-input" 
+                        placeholder="City, State, Country"
+                        value="{{ template_data.address }}"
+                        oninput="updatePreview()"
+                    >
+                </div>
+                
+                <div class="form-group">
+                    <label>GitHub Link</label>
+                    <input 
+                        type="text" 
+                        name="github_link" 
+                        class="form-input editor-input" 
+                        placeholder="github.com/username"
+                        value="{{ template_data.github_link }}"
+                        oninput="updatePreview()"
+                    >
+                </div>
+            </div>
+            
+            <!-- Strengths -->
+            <div class="editor-section">
+                <h4 class="section-title">💪 Strengths</h4>
+                
+                <div class="form-group">
+                    <label>Strengths (optional)</label>
+                    <textarea 
+                        name="strengths" 
+                        class="form-input editor-input" 
+                        rows="4"
+                        oninput="updatePreview()"
+                        placeholder="List your key strengths, one per line with bullet points"
+                    >{{ template_data.strengths }}</textarea>
+                    <small>E.g., - Problem-solving skills, - Team leadership, etc.</small>
+                </div>
+            </div>
+            
+            <!-- Weaknesses -->
+            <div class="editor-section">
+                <h4 class="section-title">⚠️ Weaknesses/Areas to Improve</h4>
+                
+                <div class="form-group">
+                    <label>Weaknesses (optional)</label>
+                    <textarea 
+                        name="weaknesses" 
+                        class="form-input editor-input" 
+                        rows="4"
+                        oninput="updatePreview()"
+                        placeholder="Areas where you're working to improve (shows self-awareness)"
+                    >{{ template_data.weaknesses }}</textarea>
+                    <small>E.g., - Limited experience with X, - Working on Y skill, etc.</small>
+                </div>
+            </div>
+            
+            <!-- Declaration -->
+            <div class="editor-section">
+                <h4 class="section-title">✍️ Declaration</h4>
+                
+                <div class="form-group">
+                    <label>Declaration (optional)</label>
+                    <textarea 
+                        name="declaration" 
+                        class="form-input editor-input" 
+                        rows="3"
+                        oninput="updatePreview()"
+                        placeholder="Declaration of accuracy"
+                    >{{ template_data.declaration }}</textarea>
+                    <small>Standard: "I hereby declare that the information provided in this resume is true and accurate..."</small>
+                </div>
+            </div>
+            
+            <button type="submit" class="btn btn-primary btn-full">💾 Create Resume</button>
+        </form>
+    </div>
+</div>
+
+<script>
+function updatePreview() {
+    const name = document.querySelector('input[name="name"]').value;
+    const role = document.querySelector('input[name="role"]').value;
+    const phone = document.querySelector('input[name="phone"]').value;
+    const email = document.querySelector('input[name="email"]').value;
+    const dob = document.querySelector('input[name="dob"]').value;
+    const linkedin = document.querySelector('input[name="linkedin"]').value;
+    const address = document.querySelector('input[name="address"]').value;
+    const github_link = document.querySelector('input[name="github_link"]').value;
+    const summary = document.querySelector('textarea[name="summary"]').value;
+    const experience = document.querySelector('textarea[name="experience"]').value;
+    const internships = document.querySelector('textarea[name="internships"]').value;
+    const projects = document.querySelector('textarea[name="projects"]').value;
+    const certifications = document.querySelector('textarea[name="certifications"]').value;
+    const skills = document.querySelector('textarea[name="skills"]').value;
+    const education = document.querySelector('textarea[name="education"]').value;
+    const strengths = document.querySelector('textarea[name="strengths"]').value;
+    const weaknesses = document.querySelector('textarea[name="weaknesses"]').value;
+    const declaration = document.querySelector('textarea[name="declaration"]').value;
+    
+    // Update name and role
+    document.querySelector('.preview-name').textContent = name || 'Your Name';
+    document.querySelector('.preview-role').textContent = role || 'Job Title';
+    
+    // Update contact info
+    const contactInfo = document.querySelector('.resume-contact-info');
+    let contactHTML = '';
+    if (phone) contactHTML += `<span class="contact-item">📱 ${phone}</span>`;
+    if (email) contactHTML += `<span class="contact-item">📧 ${email}</span>`;
+    if (linkedin) contactHTML += `<span class="contact-item">💼 ${linkedin}</span>`;
+    if (dob) contactHTML += `<span class="contact-item">📅 DOB: ${dob}</span>`;
+    if (address) contactHTML += `<span class="contact-item">📍 ${address}</span>`;
+    if (github_link) contactHTML += `<span class="contact-item">🐙 ${github_link}</span>`;
+    if (contactInfo) contactInfo.innerHTML = contactHTML;
+    
+    // Update preview sections
+    const previewSummary = document.querySelector('.preview-summary');
+    if (previewSummary) previewSummary.textContent = summary;
+    
+    const previewExperience = document.querySelector('.preview-experience');
+    if (previewExperience) previewExperience.textContent = experience;
+    
+    const previewInternships = document.querySelector('.preview-internships');
+    if (previewInternships) {
+        previewInternships.textContent = internships;
+        const section = document.getElementById('section-internships');
+        if (section) section.style.display = internships.trim() ? 'block' : 'none';
+    }
+    
+    const previewProjects = document.querySelector('.preview-projects');
+    if (previewProjects) {
+        previewProjects.textContent = projects;
+        const section = document.getElementById('section-projects');
+        if (section) section.style.display = projects.trim() ? 'block' : 'none';
+    }
+    
+    const previewCertifications = document.querySelector('.preview-certifications');
+    if (previewCertifications) {
+        previewCertifications.textContent = certifications;
+        const section = document.getElementById('section-certifications');
+        if (section) section.style.display = certifications.trim() ? 'block' : 'none';
+    }
+    
+    // Update skills as formatted list
+    const previewSkills = document.querySelector('.preview-skills');
+    if (previewSkills) {
+        const skillLines = skills.split('\n').filter(line => line.trim());
+        if (skillLines.length > 0) {
+            const skillsList = skillLines.map(skill => `<li class="skill-item">${skill.trim()}</li>`).join('');
+            previewSkills.innerHTML = `<ul class="skills-list">${skillsList}</ul>`;
+        } else {
+            previewSkills.innerHTML = '';
+        }
+    }
+    
+    const previewEducation = document.querySelector('.preview-education');
+    if (previewEducation) previewEducation.textContent = education;
+    
+    const previewStrengths = document.querySelector('.preview-strengths');
+    if (previewStrengths) {
+        previewStrengths.textContent = strengths;
+        const section = document.getElementById('section-strengths');
+        if (section) section.style.display = strengths.trim() ? 'block' : 'none';
+    }
+    
+    const previewWeaknesses = document.querySelector('.preview-weaknesses');
+    if (previewWeaknesses) {
+        previewWeaknesses.textContent = weaknesses;
+        const section = document.getElementById('section-weaknesses');
+        if (section) section.style.display = weaknesses.trim() ? 'block' : 'none';
+    }
+    
+    const previewDeclaration = document.querySelector('.preview-declaration');
+    if (previewDeclaration) {
+        previewDeclaration.textContent = declaration;
+        const section = document.getElementById('section-declaration');
+        if (section) section.style.display = declaration.trim() ? 'block' : 'none';
+    }
+}
+
+// Auto-update on input
+document.querySelectorAll('.editor-input').forEach(input => {
+    input.addEventListener('input', updatePreview);
+});
+
+// Handle form submission
+document.getElementById('builderForm').addEventListener('submit', function(e) {
+    // Allow normal form submission
+});
+
+// Make the top header button trigger the form submission
+const saveBtn = document.getElementById('saveBtn');
+if (saveBtn) {
+    saveBtn.addEventListener('click', function() {
+        document.getElementById('builderForm').submit();
+    });
+}
+</script>
+
+<style>
+.visual-builder-container {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: var(--spacing-large);
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: var(--spacing-large);
+    min-height: 100vh;
+}
+
+/* Resume Preview Panel */
+.resume-preview-panel {
+    background: white;
+    border-radius: 8px;
+    box-shadow: var(--box-shadow);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: sticky;
+    top: 20px;
+    max-height: calc(100vh - 40px);
+}
+
+.preview-header-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-unit);
+    border-bottom: 1px solid #e0e0e0;
+    background: #f9f9f9;
+}
+
+.preview-header-bar h3 {
+    margin: 0;
+    font-size: 16px;
+    color: var(--dark-gray);
+}
+
+.resume-content {
+    overflow-y: auto;
+    padding: 40px;
+    flex: 1;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+    background: white;
+    color: #333;
+}
+
+.resume-content strong {
+    font-weight: 700;
+}
+
+.resume-section {
+    margin-bottom: 20px;
+}
+
+.resume-section-title {
+    font-size: 16px;
+    font-weight: bold;
+    color: #667eea;
+    letter-spacing: 1px;
+    margin: 20px 0 12px 0;
+    text-transform: uppercase;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 5px;
+}
+
+.resume-section-content {
+    font-size: 13px;
+    color: #555;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+.preview-skills {
+    white-space: normal;
+}
+
+.skills-list {
+    margin: 0;
+    padding-left: 20px;
+    list-style: none;
+}
+
+.skill-item {
+    margin-bottom: 2px;
+    line-height: 1.2;
+    font-size: 13px;
+}
+
+.skill-item:before {
+    content: "• ";
+    color: #667eea;
+    font-weight: bold;
+    margin-right: 6px;
+}
+
+.resume-header {
+    text-align: center;
+    margin-bottom: 25px;
+    border-bottom: 2px solid #667eea;
+    padding-bottom: 15px;
+}
+
+.preview-name {
+    font-size: 28px;
+    font-weight: bold;
+    color: #667eea;
+    margin: 0;
+}
+
+.preview-role {
+    font-size: 18px;
+    color: #764ba2;
+    font-weight: 600;
+    margin-top: 5px;
+}
+
+.resume-contact-info {
+    font-size: 12px;
+    color: #555;
+    margin-top: 8px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+}
+
+.contact-item {
+    display: inline-block;
+}
+
+/* Editor Panel */
+.editor-panel {
+    background: white;
+    border-radius: 8px;
+    box-shadow: var(--box-shadow);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.editor-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-unit);
+    border-bottom: 1px solid #e0e0e0;
+    background: #f9f9f9;
+}
+
+.editor-header h3 {
+    margin: 0;
+    font-size: 16px;
+    color: var(--dark-gray);
+}
+
+.editor-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.editor-form {
+    overflow-y: auto;
+    padding: var(--spacing-large);
+    flex: 1;
+}
+
+.editor-section {
+    margin-bottom: var(--spacing-large);
+    padding-bottom: var(--spacing-large);
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.editor-section:last-of-type {
+    border-bottom: none;
+}
+
+.section-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--dark-gray);
+    margin-bottom: var(--spacing-unit);
+}
+
+.editor-input {
+    font-family: 'Calibri', 'Arial', sans-serif;
+}
+
+.editor-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+}
+
+.form-group small {
+    display: block;
+    margin-top: 4px;
+    color: #999;
+    font-size: 12px;
+}
+
+.btn-full {
+    width: 100%;
+    margin-top: var(--spacing-large);
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+    .visual-builder-container {
+        grid-template-columns: 1fr;
+    }
+
+    .resume-preview-panel {
+        position: relative;
+        top: 0;
+        max-height: none;
+        order: 2;
+    }
+
+    .editor-panel {
+        order: 1;
+    }
+}
+
+@media (max-width: 768px) {
+    .visual-builder-container {
+        padding: var(--spacing-unit);
+        gap: var(--spacing-unit);
+    }
+
+    .resume-content {
+        padding: 20px;
+        font-size: 12px;
+    }
+
+    .preview-name {
+        font-size: 20px;
+    }
+
+    .editor-panel {
+        max-height: 100%;
+    }
+}
+</style>
+{% endblock %}

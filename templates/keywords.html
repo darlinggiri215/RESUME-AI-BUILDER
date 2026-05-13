@@ -1,0 +1,185 @@
+{% extends "base.html" %}
+
+{% block title %}Keyword Generator - Resume AI Builder{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>🔑 Keyword Generator</h1>
+    <p>Extract important keywords from job descriptions</p>
+</div>
+
+<div class="form-container">
+    {% if error %}
+    <div class="error-box">
+        <strong>❌ Error:</strong> {{ error }}
+    </div>
+    {% endif %}
+
+    {% if keywords %}
+    <!-- RESULTS VIEW -->
+    <div class="keywords-results">
+        <div class="result-header">
+            <h3>Extracted Keywords from Job Description</h3>
+            <a href="/keywords" class="btn btn-secondary">Generate Different Keywords</a>
+        </div>
+
+        <!-- Technical Skills -->
+        {% if keywords.technical %}
+        <div class="keyword-section">
+            <h4>⚙️ Technical Skills (Most Important)</h4>
+            <p class="keyword-description">Include these technical keywords in your resume</p>
+            <div class="keywords-grid large">
+                {% for keyword in keywords.technical %}
+                <div class="keyword-card">
+                    <span class="keyword-text">{{ keyword }}</span>
+                    <button type="button" class="btn-copy" onclick="copyToClipboard('{{ keyword }}')">Copy</button>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Soft Skills -->
+        {% if keywords.soft_skills %}
+        <div class="keyword-section">
+            <h4>🤝 Soft Skills</h4>
+            <p class="keyword-description">Highlight these soft skills in your experience descriptions</p>
+            <div class="keywords-grid">
+                {% for keyword in keywords.soft_skills %}
+                <div class="keyword-card">
+                    <span class="keyword-text">{{ keyword }}</span>
+                    <button type="button" class="btn-copy" onclick="copyToClipboard('{{ keyword }}')">Copy</button>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Other Keywords -->
+        {% if keywords.other %}
+        <div class="keyword-section">
+            <h4>📚 Other Key Terms</h4>
+            <p class="keyword-description">These keywords appear important in the job description</p>
+            <div class="keywords-grid">
+                {% for keyword in keywords.other %}
+                <span class="keyword-tag">{{ keyword }}</span>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="result-actions">
+            <a href="/keywords" class="btn btn-secondary">Analyze Another Job</a>
+            <a href="/builder" class="btn btn-primary">Update Your Resume</a>
+            <a href="/dashboard" class="btn btn-secondary">Back to Dashboard</a>
+        </div>
+
+        <div class="tips-box">
+            <h3>💡 How to Use These Keywords</h3>
+            <ul>
+                <li><strong>Technical Skills:</strong> Add these directly to your skills section</li>
+                <li><strong>Experience:</strong> Incorporate keywords naturally in your job descriptions</li>
+                <li><strong>Summary:</strong> Mention key terms in your professional summary</li>
+                <li><strong>Balance:</strong> Use keywords naturally - don't stuff your resume with them</li>
+                <li><strong>Customize:</strong> Every job posting has different keywords - customize for each application</li>
+            </ul>
+        </div>
+    </div>
+
+    {% else %}
+    <!-- FORM VIEW -->
+    <form method="POST" class="keywords-form">
+        <div class="form-group">
+            <label for="job_description">Job Description</label>
+            <textarea 
+                id="job_description" 
+                name="job_description" 
+                required
+                rows="12"
+                class="form-input"
+                placeholder="Paste a job description here and we'll extract the important keywords for you.
+
+Example:
+
+Senior Python Developer
+We're looking for a talented Senior Python Developer to join our team...
+
+Requirements:
+- 5+ years of Python development experience
+- Strong knowledge of Django and Flask frameworks
+- Experience with PostgreSQL and MongoDB
+- AWS cloud deployment experience
+- REST API design and development
+- Docker containerization
+- Git version control
+- Bachelor's degree in Computer Science
+
+Nice to have:
+- Kubernetes orchestration
+- CI/CD pipeline experience
+- Agile/Scrum methodology
+- Leadership experience
+- Open source contributions"
+            ></textarea>
+            <small>💡 TIP: Copy the entire job posting for the best keyword extraction</small>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-full">Extract Keywords</button>
+    </form>
+
+    <div class="tips-box">
+        <h3>📌 Understanding Our Keyword Categories</h3>
+        
+        <div class="category-details">
+            <div class="category">
+                <h4>⚙️ Technical Skills</h4>
+                <p>Programming languages, frameworks, tools, and technologies mentioned in the job description. These are critical for ATS systems.</p>
+                <p class="example">Examples: Python, Django, PostgreSQL, Docker, AWS, REST API, React</p>
+            </div>
+
+            <div class="category">
+                <h4>🤝 Soft Skills</h4>
+                <p>Communication, leadership, problem-solving, and team-oriented skills. Important but less technical.</p>
+                <p class="example">Examples: Leadership, Communication, Teamwork, Problem Solving, Management</p>
+            </div>
+
+            <div class="category">
+                <h4>📚 Other Key Terms</h4>
+                <p>Methodologies, certifications, and other important terms from the job description.</p>
+                <p class="example">Examples: Agile, Scrum, CI/CD, Microservices, Cloud Native</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="workflow-box">
+        <h3>🎯 Recommended Workflow</h3>
+        <ol>
+            <li>Find a job posting that interests you</li>
+            <li>Paste it here to extract keywords</li>
+            <li>Note the technical skills and key terms</li>
+            <li>Use our <a href="/ats-score">ATS Score Check</a> to see how your resume matches</li>
+            <li>Update your resume using the keyword suggestions</li>
+            <li>Check your new ATS score to verify improvements</li>
+        </ol>
+    </div>
+
+    {% endif %}
+</div>
+
+<script>
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(() => {
+        alert('Copied: ' + text);
+    }).catch(() => {
+        // Fallback for older browsers
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+        alert('Copied: ' + text);
+    });
+}
+</script>
+{% endblock %}

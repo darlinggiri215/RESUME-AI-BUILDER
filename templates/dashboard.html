@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Resume AI Builder{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <div class="dashboard-header">
+        <h1>👋 Welcome, {{ user.full_name }}!</h1>
+        <p class="dashboard-subtitle">Welcome to your Resume AI Builder Dashboard</p>
+    </div>
+
+    <!-- Quick Actions Grid -->
+    <div class="actions-grid">
+        <a href="/builder/templates" class="action-card primary">
+            <div class="action-icon">✏️</div>
+            <h3>Build from Scratch</h3>
+            <p>Create a new resume using our builder</p>
+            <span class="action-cta">Start Building →</span>
+        </a>
+        
+        <a href="/ats-score" class="action-card secondary">
+            <div class="action-icon">📊</div>
+            <h3>ATS Score Check</h3>
+            <p>Check resume compatibility score</p>
+            <span class="action-cta">Check Score →</span>
+        </a>
+        
+        <a href="/keywords" class="action-card secondary">
+            <div class="action-icon">🔑</div>
+            <h3>Keyword Generator</h3>
+            <p>Get keyword suggestions from job posts</p>
+            <span class="action-cta">Generate Keywords →</span>
+        </a>
+    </div>
+
+    <!-- Your Resumes Section -->
+    {% if resumes %}
+    <div class="dashboard-section">
+        <h2>📋 Your Resumes</h2>
+        <div class="resumes-list">
+            {% for resume in resumes %}
+            <div class="resume-card">
+                <div class="resume-info">
+                    <h4>{{ resume.name or 'Unnamed Resume' }}</h4>
+                    <p class="resume-role">{{ resume.role or 'No role specified' }}</p>
+                    <small class="resume-date">Created: {{ resume.created_at }}</small>
+                </div>
+                <div class="resume-actions">
+                    {% if resume.id %}
+                    <a href="/preview/{{ resume.id }}" class="btn-small btn-preview" target="_blank">👁️ Preview</a>
+                    <a href="/download/{{ resume.id }}" class="btn-small btn-download">📥 Download PDF</a>
+                    <a href="/ats-score?resume_id={{ resume.id }}" class="btn-small btn-check">📊 Check ATS</a>
+                    {% else %}
+                    <span class="text-muted">Resume ID missing</span>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <p>📝 No resumes yet. <a href="/upload">Upload one</a> or <a href="/builder">create from scratch</a></p>
+    </div>
+    {% endif %}
+
+    <!-- Recent ATS Scores -->
+    {% if ats_scores %}
+    <div class="dashboard-section">
+        <h2>📊 Recent ATS Checks</h2>
+        <div class="scores-list">
+            {% for score in ats_scores %}
+            <div class="score-card">
+                <div class="score-display">
+                    <div class="score-value">{{ score.score }}%</div>
+                    <div class="score-label">ATS Score</div>
+                </div>
+                <div class="score-info">
+                    <small>Checked: {{ score.created_at }}</small>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Tips Section -->
+    <div class="dashboard-section tips-section">
+        <h2>💡 Tips for Success</h2>
+        <div class="tips-grid">
+            <div class="tip-card">
+                <h4>✓ Use Clear Formatting</h4>
+                <p>Use standard fonts and bullet points. Avoid tables and images that confuse ATS.</p>
+            </div>
+            <div class="tip-card">
+                <h4>✓ Include Keywords</h4>
+                <p>Match job description keywords. Use our keyword generator to find the right terms.</p>
+            </div>
+            <div class="tip-card">
+                <h4>✓ Complete All Sections</h4>
+                <p>Include contact info, summary, experience, skills, and education sections.</p>
+            </div>
+            <div class="tip-card">
+                <h4>✓ Quantify Achievements</h4>
+                <p>Use numbers and percentages. "Increased sales 40%" is better than "improved sales".</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

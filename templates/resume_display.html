@@ -1,0 +1,423 @@
+{% extends "base.html" %}
+
+{% block title %}Resume Preview - Resume AI Builder{% endblock %}
+
+{% block extra_css %}
+<style>
+    .preview-container {
+        max-width: 900px;
+        margin: 30px auto;
+        padding: 20px;
+    }
+
+    .preview-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        gap: 15px;
+        flex-wrap: wrap;
+    }
+
+    .preview-controls {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .preview-controls button,
+    .preview-controls a {
+        padding: 10px 16px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 14px;
+        text-decoration: none;
+        transition: all 0.3s;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .btn-print {
+        background: #667eea;
+        color: white;
+    }
+
+    .btn-print:hover {
+        background: #5568d3;
+    }
+
+    .btn-download {
+        background: #28a745;
+        color: white;
+    }
+
+    .btn-download:hover {
+        background: #218838;
+    }
+
+    .btn-back {
+        background: #6c757d;
+        color: white;
+    }
+
+    .btn-back:hover {
+        background: #5a6268;
+    }
+
+    .resume-display {
+        background: white;
+        padding: 40px 50px;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        line-height: 1.6;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        color: #333;
+        width: 100%;
+        max-width: 210mm; /* A4 width */
+        /* Allow height to grow with content so preview shows all sections */
+        min-height: auto;
+        margin: 0 auto;
+        box-sizing: border-box;
+        /* Ensure the preview page can scroll if content is long */
+        overflow: visible;
+    }
+
+    /* Ensure colors and list styles are preserved when rendering to PDF */
+    .resume-display, .resume-display * {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    .resume-display-content ul,
+    .resume-display-content ol {
+        margin: 8px 0 8px 18px;
+        padding: 0;
+        color: #555;
+    }
+
+    .resume-display-content li {
+        margin-bottom: 6px;
+    }
+
+    .resume-display-header {
+        text-align: center;
+        margin-bottom: 25px;
+        border-bottom: 2px solid #667eea;
+        padding-bottom: 15px;
+    }
+
+    .resume-display-name {
+        font-size: 28px;
+        font-weight: bold;
+        color: #667eea;
+        margin: 0;
+    }
+
+    .resume-display-role {
+        font-size: 18px;
+        color: #764ba2;
+        font-weight: 600;
+        margin: 5px 0 10px 0;
+    }
+
+    .resume-display-contact {
+        font-size: 13px;
+        color: #666;
+        margin: 5px 0;
+    }
+
+    .resume-display-contact a {
+        color: #667eea;
+        text-decoration: none;
+    }
+
+    .resume-display-contact a:hover {
+        text-decoration: underline;
+    }
+
+    .resume-display-section {
+        margin-bottom: 20px;
+        /* Allow sections to break across pages when exporting to PDF so nothing is dropped */
+        page-break-inside: auto;
+        break-inside: auto;
+    }
+
+    .resume-display-section-title {
+        font-size: 16px;
+        font-weight: bold;
+        color: #667eea;
+        text-transform: uppercase;
+        margin: 20px 0 12px 0;
+        padding-bottom: 5px;
+        border-bottom: 1px solid #ddd;
+    }
+
+    .resume-display-content {
+        color: #555;
+        font-size: 13px;
+        line-height: 1.6;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+    }
+
+    .resume-display-empty {
+        color: #999;
+        font-style: italic;
+        font-size: 13px;
+    }
+
+    /* Print Styles */
+    @media print {
+        body {
+            margin: 0;
+            padding: 0;
+            background: white;
+        }
+
+        .preview-header {
+            display: none;
+        }
+
+        .preview-container {
+            max-width: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        .resume-display {
+            padding: 40px;
+            box-shadow: none;
+        }
+    }
+
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+        .preview-container {
+            padding: 10px;
+        }
+
+        .resume-display {
+            padding: 20px;
+        }
+
+        .resume-display-name {
+            font-size: 22px;
+        }
+
+        .resume-display-role {
+            font-size: 16px;
+        }
+
+        .preview-header {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .preview-controls {
+            width: 100%;
+        }
+
+        .preview-controls button,
+        .preview-controls a {
+            flex: 1;
+            justify-content: center;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="preview-container">
+    <div class="preview-header">
+        <h2>📄 Resume Preview</h2>
+        <div class="preview-controls">
+            <button class="btn-print" onclick="window.print()">🖨️ Print</button>
+            <button onclick="downloadPDF()" class="btn-download">📥 Download as PDF</button>
+            <a href="/dashboard" class="btn-back">← Back</a>
+        </div>
+    </div>
+
+    <div class="resume-display">
+        <!-- Header -->
+        <div class="resume-display-header">
+            <h1 class="resume-display-name">{{ resume.name or 'Your Name' }}</h1>
+            {% if resume.role %}
+            <p class="resume-display-role">{{ resume.role }}</p>
+            {% endif %}
+            <div class="resume-display-contact">
+                {% if resume.email %}
+                    <a href="mailto:{{ resume.email }}">{{ resume.email }}</a>
+                {% endif %}
+                {% if resume.phone %}
+                    {% if resume.email %} | {% endif %}
+                    <a href="tel:{{ resume.phone }}">{{ resume.phone }}</a>
+                {% endif %}
+                {% if resume.dob %}
+                    {% if resume.email or resume.phone %} | {% endif %}
+                    DOB: {{ resume.dob }}
+                {% endif %}
+            </div>
+            {% if resume.address %}
+            <div class="resume-display-contact">
+                📍 {{ resume.address }}
+            </div>
+            {% endif %}
+            {% if resume.linkedin or resume.github_link %}
+            <div class="resume-display-contact" style="margin-top: 8px;">
+                {% if resume.linkedin %}
+                    <a href="https://{{ resume.linkedin if not resume.linkedin.startswith('http') else resume.linkedin.replace('https://', '').replace('http://', '') }}" target="_blank">{{ resume.linkedin }}</a>
+                {% endif %}
+                {% if resume.github_link %}
+                    {% if resume.linkedin %} | {% endif %}
+                    <a href="https://{{ resume.github_link if not resume.github_link.startswith('http') else resume.github_link.replace('https://', '').replace('http://', '') }}" target="_blank">{{ resume.github_link }}</a>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Professional Summary -->
+        {% if resume.summary %}
+        <div class="resume-display-section">
+            <h3 class="resume-display-section-title">Professional Summary</h3>
+            <div class="resume-display-content">{{ resume.summary }}</div>
+        </div>
+        {% endif %}
+
+        <!-- Experience -->
+        {% if resume.experience %}
+        <div class="resume-display-section">
+            <h3 class="resume-display-section-title">Work Experience</h3>
+            <div class="resume-display-content">{{ resume.experience }}</div>
+        </div>
+        {% else %}
+        <div class="resume-display-section">
+            <h3 class="resume-display-section-title">Work Experience</h3>
+            <p class="resume-display-empty">No experience added</p>
+        </div>
+        {% endif %}
+
+        <!-- Internships -->
+        {% if resume.internships %}
+        <div class="resume-display-section">
+            <h3 class="resume-display-section-title">Internships</h3>
+            <div class="resume-display-content">{{ resume.internships }}</div>
+        </div>
+        {% endif %}
+
+        <!-- Projects -->
+        {% if resume.projects %}
+        <div class="resume-display-section">
+            <h3 class="resume-display-section-title">Projects</h3>
+            <div class="resume-display-content">{{ resume.projects }}</div>
+        </div>
+        {% endif %}
+
+        <!-- Education -->
+        {% if resume.education %}
+        <div class="resume-display-section">
+            <h3 class="resume-display-section-title">Education</h3>
+            <div class="resume-display-content">{{ resume.education }}</div>
+        </div>
+        {% else %}
+        <div class="resume-display-section">
+            <h3 class="resume-display-section-title">Education</h3>
+            <p class="resume-display-empty">No education information added</p>
+        </div>
+        {% endif %}
+
+        <!-- Skills -->
+        {% if resume.skills %}
+        <div class="resume-display-section">
+            <h3 class="resume-display-section-title">Skills</h3>
+            <div class="resume-display-content">{{ resume.skills }}</div>
+        </div>
+        {% else %}
+        <div class="resume-display-section">
+            <h3 class="resume-display-section-title">Skills</h3>
+            <p class="resume-display-empty">No skills added</p>
+        </div>
+        {% endif %}
+
+        <!-- Certifications -->
+        {% if resume.certifications %}
+        <div class="resume-display-section">
+            <h3 class="resume-display-section-title">Certifications & Awards</h3>
+            <div class="resume-display-content">{{ resume.certifications }}</div>
+        </div>
+        {% endif %}
+
+        <!-- Strengths -->
+        {% if resume.strengths %}
+        <div class="resume-display-section">
+            <h3 class="resume-display-section-title">Key Strengths</h3>
+            <div class="resume-display-content">{{ resume.strengths }}</div>
+        </div>
+        {% endif %}
+
+        <!-- Declaration -->
+        {% if resume.declaration %}
+        <div class="resume-display-section">
+            <h3 class="resume-display-section-title">Declaration</h3>
+            <p style="font-size: 12px; color: #666;">{{ resume.declaration }}</p>
+        </div>
+        {% endif %}
+
+        <!-- Footer note -->
+        <div style="margin-top: 30px; padding-top: 15px; border-top: 1px solid #ddd; text-align: center; font-size: 11px; color: #999;">
+            <p>Generated by Resume AI Builder</p>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script>
+    // Keyboard shortcut for printing (Ctrl/Cmd + P)
+    document.addEventListener('keydown', function(e) {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
+            e.preventDefault();
+            window.print();
+        }
+    });
+
+    function downloadPDF() {
+        // Scroll to top to prevent html2canvas cropping issues
+        window.scrollTo(0, 0);
+        
+        const element = document.querySelector('.resume-display');
+        const opt = {
+            margin:       [10, 10, 10, 10],
+            filename:     '{{ resume.name|default("resume") }}.pdf',
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  {
+                scale: 2,
+                useCORS: true,
+                logging: false,
+                // Ensure the full element is captured, avoid viewport cropping
+                scrollY: 0,
+                windowWidth: document.body.scrollWidth,
+                windowHeight: document.body.scrollHeight
+            },
+            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
+            // Allow css-based page breaks and legacy handling for safe multi-page output
+            pagebreak:    { mode: ['css', 'legacy'] }
+        };
+
+        // Temporarily adjust box-shadow/padding for cleaner PDF if needed
+        const originalBoxShadow = element.style.boxShadow;
+        element.style.boxShadow = 'none';
+        
+        html2pdf().set(opt).from(element).save().then(() => {
+            element.style.boxShadow = originalBoxShadow;
+        });
+    }
+    
+    // Auto-download if url has ?download=true
+    window.onload = function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('download') === 'true') {
+            downloadPDF();
+        }
+    };
+</script>
+{% endblock %}

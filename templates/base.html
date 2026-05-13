@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Resume AI Builder{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/chat_widget.css') }}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar" {% if request.path == '/' and not session.user_id %}style="background: transparent; border: none; box-shadow: none;"{% endif %}>
+        <div class="container">
+            <div class="navbar-brand">
+                {% if session.user_id %}
+                    <span class="logo">📄 Resume AI Builder</span>
+                {% else %}
+                    <a href="/" class="logo">📄 Resume AI Builder</a>
+                {% endif %}
+            </div>
+            
+            <div class="navbar-menu">
+                {% if session.user_id %}
+                    <span class="navbar-item">Hello, {{ session.email }}</span>
+                    <a href="/dashboard" class="navbar-item">Dashboard</a>
+                    <a href="/logout" class="navbar-item btn-logout">Logout</a>
+                {% else %}
+                    {% if request.path != '/' %}
+                    <a href="/" class="navbar-item">Home</a>
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="page-wrapper {% if request.path == '/' and not session.user_id %}landing-page{% endif %}">
+        <div class="{% if request.path != '/' or session.user_id %}container{% endif %}">
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+
+    <!-- Footer -->
+    {% if request.path != '/' or session.user_id %}
+    <footer class="footer">
+        <p>&copy; 2026 Resume AI Builder | A Project By Giri Kumar</p>
+    </footer>
+    {% endif %}
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/chat_widget.js') }}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
