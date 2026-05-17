@@ -6,3 +6,4 @@ reportlab==4.0.9
 weasyprint==59.0
 Flask-Mail==0.9.1
 twilio==8.10.0
+pypdf
